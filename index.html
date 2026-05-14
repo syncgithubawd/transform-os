@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Transform OS">
+<meta name="theme-color" content="#080808">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="logo.jpeg">
+<title>Transformation OS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-icon">⚡</div>
+  <div class="splash-title">TRANSFORM OS</div>
+  <div class="splash-sub">Life Operating System</div>
+  <div class="splash-bar-bg"><div class="splash-bar"></div></div>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div id="search-overlay">
+  <button onclick="closeSearch()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+  <input class="search-input-big" id="search-input" placeholder="Search anything — exercises, labs, goals..." oninput="handleSearch(this.value)" autofocus>
+  <div id="search-results"></div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="add-ex-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">ADD EXERCISE</div>
+    <div id="add-ex-list" style="margin-bottom:16px"></div>
+    <div class="divider"></div>
+    <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">CREATE CUSTOM</div>
+    <input id="custom-ex-name" placeholder="Exercise name" style="width:100%;padding:10px 12px;margin-bottom:8px;font-size:13px">
+    <input id="custom-ex-cat" placeholder="Category (Chest, Back, Legs...)" style="width:100%;padding:10px 12px;margin-bottom:10px;font-size:13px">
+    <button class="btn-primary full" onclick="addCustomExercise()">CREATE EXERCISE</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="add-social-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">ADD PLATFORM</div>
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Platform</div>
+    <select id="social-platform" style="width:100%;padding:10px 12px;margin-bottom:12px;font-size:13px">
+      <option>TikTok</option><option>Instagram</option><option>YouTube</option><option>Twitter</option><option>Other</option>
+    </select>
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Handle</div>
+    <input id="social-handle" placeholder="@yourhandle" style="width:100%;padding:10px 12px;margin-bottom:12px;font-size:13px">
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Current Followers</div>
+    <input id="social-followers-inp" type="number" placeholder="0" style="width:100%;padding:10px 12px;margin-bottom:16px;font-size:13px">
+    <button class="btn-primary full" onclick="addSocial()">ADD PLATFORM</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="add-goal-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">NEW GOAL</div>
+    <input id="cg-name" placeholder="Goal name" style="width:100%;padding:10px 12px;margin-bottom:8px;font-size:13px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <input id="cg-target" type="number" placeholder="Target" style="padding:10px 12px;font-size:13px">
+      <input id="cg-unit" placeholder="Unit (kg, %, ...)" style="padding:10px 12px;font-size:13px">
+    </div>
+    <input id="cg-icon" placeholder="Icon emoji (e.g. 🎯)" style="width:100%;padding:10px 12px;margin-bottom:16px;font-size:13px">
+    <button class="btn-primary full" onclick="addCustomGoal()">ADD GOAL</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settings-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">SETTINGS</div>
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Your Name</div>
+    <input id="settings-name" placeholder="e.g. Alex" style="width:100%;padding:10px 12px;margin-bottom:12px;font-size:13px">
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Brand Name</div>
+    <input id="settings-brand" placeholder="e.g. My Brand" style="width:100%;padding:10px 12px;margin-bottom:12px;font-size:13px">
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Tagline</div>
+    <input id="settings-tagline" placeholder="Building the long game." style="width:100%;padding:10px 12px;margin-bottom:16px;font-size:13px">
+    <button class="btn-primary full" onclick="saveSettingsForm()">SAVE</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div class="header-top">
+      <div>
+        <div class="header-greeting" id="week-day">WEEK 1 · DAY 0</div>
+        <div class="header-name" id="header-name">DASHBOARD</div>
+      </div>
+      <div class="header-right">
+        <div class="cycle-badge">CYCLE ON</div>
+        <button onclick="document.getElementById('settings-modal').classList.add('open')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--muted);cursor:pointer;font-size:14px">⚙️</button>
+      </div>
+    </div>
+    <div class="header-search" onclick="openSearch()">
+      <span>🔍</span>
+      <span>Search anything... exercises, labs, goals...</span>
+    </div>
+    <div class="cycle-strip">
+      <span class="cycle-strip-label">12-WEEK CYCLE</span>
+      <div class="cycle-bar-wrap"><div class="cycle-bar" id="cycle-bar" style="width:0%"></div></div>
+      <span class="cycle-pct" id="cycle-pct">0%</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- ── DASHBOARD ─────────────────────────────────────────────────────── -->
+    <div class="tab-content active" id="tab-dashboard">
+
+      <div class="inspo-card">
+        <div class="inspo-label">⚡ ONPOINT · DAILY FUEL</div>
+        <div class="inspo-text" id="inspo-text"></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-val" id="dash-stat-week" style="color:var(--gold)">W1</div>
+          <div class="stat-label">Cycle Week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="dash-stat-day" style="color:var(--aqua)">0</div>
+          <div class="stat-label">Cycle Day</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="dash-stat-pct" style="color:var(--pink)">0%</div>
+          <div class="stat-label">Complete</div>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        <div class="quick-card" onclick="switchTab('train')">
+          <div class="quick-icon">🏋️</div>
+          <div class="quick-title">Log Workout</div>
+          <div class="quick-sub">Progressive overload</div>
+        </div>
+        <div class="quick-card" onclick="switchTab('coach')">
+          <div class="quick-icon">🤖</div>
+          <div class="quick-title">Coach</div>
+          <div class="quick-sub">AI daily planning</div>
+        </div>
+        <div class="quick-card" onclick="switchTab('health')">
+          <div class="quick-icon">🩸</div>
+          <div class="quick-title">Health & Labs</div>
+          <div class="quick-sub">Bloodwork + body</div>
+        </div>
+        <div class="quick-card" onclick="switchTab('brand')">
+          <div class="quick-icon">📲</div>
+          <div class="quick-title">Brand</div>
+          <div class="quick-sub">Follower tracking</div>
+        </div>
+      </div>
+
+      <div class="habits-header">
+        <div class="section-label" style="margin-bottom:0">TODAY'S PROTOCOL</div>
+        <div class="habit-score" id="habit-score">0/10</div>
+      </div>
+      <div class="habits-grid" id="dash-habits-grid"></div>
+
+      <div class="section-label">TRANSFORMATION GOALS</div>
+      <div class="goals-mini-grid" id="dash-goals-mini"></div>
+
+      <div class="section-label">⚡ ACTIVE ALERTS</div>
+      <div id="dash-alerts"></div>
+
+    </div>
+
+    <!-- ── COACH ──────────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-coach">
+      <div class="coach-header">
+        <div class="coach-avatar">🤖</div>
+        <div class="coach-name">COACH</div>
+        <div class="coach-status">● online · knows your full context</div>
+      </div>
+
+      <div class="card card-glow-aqua" style="margin-bottom:12px">
+        <div class="section-label">DAILY CHECK-IN PROMPTS</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="btn-ghost" onclick="document.getElementById('coach-input').value='Here\'s what I ate today: '">🥩 Log Food</button>
+          <button class="btn-ghost" onclick="document.getElementById('coach-input').value='My training today: '">🏋️ Log Training</button>
+          <button class="btn-ghost" onclick="document.getElementById('coach-input').value='I slept '">😴 Log Sleep</button>
+          <button class="btn-ghost" onclick="document.getElementById('coach-input').value='My phone usage today was '">📱 Log Phone</button>
+          <button class="btn-ghost" onclick="document.getElementById('coach-input').value='Give me today\'s action plan'">📋 Daily Plan</button>
+          <button class="btn-ghost" onclick="document.getElementById('coach-input').value='How am I progressing toward my goals?'">📈 Progress Check</button>
+        </div>
+      </div>
+
+      <div class="chat-area" id="chat-area"></div>
+
+      <div class="chat-input-row">
+        <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🎤</button>
+        <textarea class="chat-input" id="coach-input" rows="1" placeholder="Tell me about your day..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCoachMessage()}" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <button class="chat-send-btn" onclick="sendCoachMessage()">→</button>
+      </div>
+      <div style="font-size:9px;color:var(--dim);text-align:center;margin-top:8px">AI Coach · Powered by Claude · Remembers your context</div>
+    </div>
+
+    <!-- ── TRAIN ──────────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-train">
+
+      <div class="pill-tabs" id="train-pill-tabs">
+        <button class="pill-tab active" onclick="setTrainTab('log',this)">Active Log</button>
+        <button class="pill-tab" onclick="setTrainTab('library',this)">Exercise Library</button>
+        <button class="pill-tab" onclick="setTrainTab('history',this)">History</button>
+      </div>
+
+      <div id="train-tab-log">
+        <div id="active-workout"></div>
+      </div>
+
+      <div id="train-tab-library" style="display:none">
+        <div class="section-label">EXERCISE LIBRARY</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Tap to add to active workout. Progressive overload targets auto-calculate.</div>
+        <div id="exercise-library"></div>
+      </div>
+
+      <div id="train-tab-history" style="display:none">
+        <div class="section-label">WORKOUT HISTORY</div>
+        <div id="workout-history-list"></div>
+      </div>
+
+    </div>
+
+    <!-- ── DAILY ──────────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-daily">
+
+      <div class="streak-card">
+        <div>
+          <div class="stat-label" style="color:#4ade80aa;margin-bottom:4px">CURRENT STREAK</div>
+          <div class="streak-val" id="streak-display">0</div>
+          <div class="streak-label">DAYS</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:32px">🔥</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">5+ habits = streak day</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="margin-bottom:12px">
+          <div class="section-label" style="margin-bottom:0">TODAY'S GOALS</div>
+          <div style="font-size:11px;color:var(--gold);font-weight:700" id="daily-progress">0 / 0 COMPLETE</div>
+        </div>
+        <div id="daily-goals-list"></div>
+        <div class="add-goal-row">
+          <input class="add-goal-input" id="add-goal-inp" placeholder="Add a goal for today..." onkeydown="if(event.key==='Enter')addDailyGoal()">
+          <button class="add-goal-btn" onclick="addDailyGoal()">+</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">PLAN TOMORROW</div>
+        <textarea id="tomorrow-plan" rows="4" placeholder="Write tonight what you want to accomplish tomorrow..." style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('tomorrow',this.value)"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="section-label">DAILY REFLECTION</div>
+        <textarea id="daily-reflection" rows="4" placeholder="What went well? What to improve? How did you feel?" style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('reflection_'+new Date().toISOString().split('T')[0],this.value)"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="section-label">CURRENT STRUGGLES</div>
+        <textarea id="struggles" rows="3" placeholder="What's on your mind right now?" style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('struggles',this.value)"></textarea>
+      </div>
+
+    </div>
+
+    <!-- ── HEALTH ─────────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-health">
+
+      <div class="pill-tabs">
+        <button class="pill-tab active" onclick="setHealthTab('body',this)">Body</button>
+        <button class="pill-tab" onclick="setHealthTab('sleep',this)">Sleep</button>
+        <button class="pill-tab" onclick="setHealthTab('labs',this)">Labs</button>
+        <button class="pill-tab" onclick="setHealthTab('cycle',this)">Cycle</button>
+      </div>
+
+      <!-- BODY -->
+      <div id="health-tab-body">
+        <div class="section-label">BODY MEASUREMENTS</div>
+        <div class="body-stat-grid">
+          <div class="body-stat">
+            <div class="body-stat-label">Weight</div>
+            <input class="body-stat-input" id="stat-weight" type="number" placeholder="—" onchange="updateBodyStat('weight',this.value)">
+            <div class="body-stat-unit">kg</div>
+          </div>
+          <div class="body-stat">
+            <div class="body-stat-label">Body Fat</div>
+            <input class="body-stat-input" id="stat-bf" type="number" placeholder="—" onchange="updateBodyStat('bf',this.value)">
+            <div class="body-stat-unit">%</div>
+          </div>
+          <div class="body-stat">
+            <div class="body-stat-label">Waist</div>
+            <input class="body-stat-input" id="stat-waist" type="number" placeholder="—" onchange="updateBodyStat('waist',this.value)">
+            <div class="body-stat-unit">cm</div>
+          </div>
+          <div class="body-stat">
+            <div class="body-stat-label">Chest</div>
+            <input class="body-stat-input" id="stat-chest" type="number" placeholder="—" onchange="updateBodyStat('chest',this.value)">
+            <div class="body-stat-unit">cm</div>
+          </div>
+          <div class="body-stat">
+            <div class="body-stat-label">Arms</div>
+            <input class="body-stat-input" id="stat-arms" type="number" placeholder="—" onchange="updateBodyStat('arms',this.value)">
+            <div class="body-stat-unit">cm</div>
+          </div>
+          <div class="body-stat">
+            <div class="body-stat-label">Blood Pressure</div>
+            <input class="body-stat-input" id="stat-bp" type="text" placeholder="120/70" onchange="updateBodyStat('bp',this.value)" style="font-size:16px">
+            <div class="body-stat-unit">mmHg</div>
+          </div>
+        </div>
+
+        <div class="coming-soon">
+          <div class="coming-soon-icon">📸</div>
+          <div class="coming-soon-title">PROGRESS PHOTOS</div>
+          <div class="coming-soon-body">Weekly physique photo tracking with side-by-side comparison. Timeline view of your transformation.</div>
+          <div class="phase-tag">PHASE 2 — REQUIRES BACKEND</div>
+        </div>
+      </div>
+
+      <!-- SLEEP -->
+      <div id="health-tab-sleep" style="display:none">
+        <div class="section-label">LAST NIGHT'S SLEEP</div>
+        <div class="sleep-row">
+          <div class="sleep-card">
+            <input type="number" id="sleep-hours" placeholder="0" style="font-size:24px;font-weight:700;color:var(--aqua);width:100%;text-align:center;background:transparent;border:none;font-family:var(--font-display)" onchange="updateSleep('hours',this.value)">
+            <div class="sleep-label">Hours</div>
+          </div>
+          <div class="sleep-card">
+            <input type="number" id="sleep-quality" placeholder="0" min="1" max="10" style="font-size:24px;font-weight:700;color:var(--gold);width:100%;text-align:center;background:transparent;border:none;font-family:var(--font-display)" onchange="updateSleep('quality',this.value)">
+            <div class="sleep-label">Quality /10</div>
+          </div>
+          <div class="sleep-card">
+            <div class="sleep-val" id="sleep-score-display">—</div>
+            <div class="sleep-label">Score</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-label">SLEEP NOTES</div>
+          <textarea id="sleep-notes" rows="3" placeholder="How did you feel? Dreams? Woke up early?" style="width:100%;font-size:12px;padding:8px 0" onchange="updateSleep('notes',this.value)"></textarea>
+        </div>
+        <div class="coming-soon">
+          <div class="coming-soon-icon">💍</div>
+          <div class="coming-soon-title">SLEEP RING IMPORT</div>
+          <div class="coming-soon-body">Import sleep data from Oura Ring, Apple Watch, or WHOOP automatically.</div>
+          <div class="phase-tag">PHASE 2 — REQUIRES BACKEND</div>
+        </div>
+      </div>
+
+      <!-- LABS -->
+      <div id="health-tab-labs" style="display:none">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:12px">Enter results → instant analysis + action steps tailored to your cycle.</div>
+
+        <div id="lab-summary" style="display:none;background:linear-gradient(135deg,#0a1400,#0f1a0f);border:1px solid #4ade8033;border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
+          <div class="section-label" style="color:var(--green)">🩺 LAB SUMMARY</div>
+          <div id="lab-summary-rows"></div>
+        </div>
+
+        <button class="btn-primary full" style="margin-bottom:12px" onclick="saveLabPanel()">💾 SAVE PANEL TO HISTORY</button>
+
+        <div id="labs-list"></div>
+
+        <div style="margin-top:16px">
+          <div class="section-label">PANEL HISTORY</div>
+          <div id="lab-history"></div>
+        </div>
+      </div>
+
+      <!-- CYCLE TAB -->
+      <div id="health-tab-cycle" style="display:none">
+
+        <div style="background:linear-gradient(135deg,#150f00,#1e1400);border:1px solid var(--gold-dim);border-radius:var(--radius);padding:16px;margin-bottom:10px">
+          <div class="section-label" style="color:var(--gold)">CURRENT PROTOCOL</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a1a00;padding-bottom:10px">
+              <div><div style="font-size:14px;font-weight:700;color:var(--gold)">Test E</div><div style="font-size:11px;color:#888">150mg × 3/wk · Sun/Wed/Fri</div></div>
+              <div style="text-align:right"><div style="font-size:12px;font-weight:700;color:var(--gold)">450mg/wk</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #002a2a;padding-bottom:10px">
+              <div><div style="font-size:14px;font-weight:700;color:var(--aqua)">HCG</div><div style="font-size:11px;color:#888">250 IU × 3/wk · Sun/Wed/Fri</div></div>
+              <div style="text-align:right"><div style="font-size:12px;font-weight:700;color:var(--aqua)">750 IU/wk</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><div style="font-size:14px;font-weight:700;color:var(--pink)">Anavar</div><div style="font-size:11px;color:#888">20mg · Daily</div></div>
+              <div style="text-align:right"><div style="font-size:12px;font-weight:700;color:var(--pink)">140mg/wk</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-glow-aqua">
+          <div class="section-label" style="color:var(--aqua)">PCT TIMELINE</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:12px">
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--aqua);margin-top:3px;flex-shrink:0"></div>
+              <div><div style="font-size:12px;font-weight:700">HCG Stop</div><div style="font-size:12px;color:var(--aqua)" id="hcg-stop"></div><div style="font-size:10px;color:var(--muted)">4 days before last pin</div></div>
+            </div>
+            <div style="display:flex;gap:12px">
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--aqua);margin-top:3px;flex-shrink:0"></div>
+              <div><div style="font-size:12px;font-weight:700">PCT Start</div><div style="font-size:12px;color:var(--aqua)" id="pct-start"></div><div style="font-size:10px;color:var(--muted)">14 days after last Test pin</div></div>
+            </div>
+            <div style="display:flex;gap:12px">
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--aqua);margin-top:3px;flex-shrink:0"></div>
+              <div><div style="font-size:12px;font-weight:700">Enclomiphene</div><div style="font-size:12px;color:var(--aqua)">12.5–25mg / day</div><div style="font-size:10px;color:var(--muted)">4–6 weeks duration</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="background:#141000;border-color:#facc1533">
+          <div style="font-size:11px;color:var(--yellow);font-weight:700;margin-bottom:4px">⚠️ Bloodwork to Monitor</div>
+          <div style="font-size:11px;color:#888;line-height:1.7">
+            Testosterone (Total + Free) · ALT + AST (liver) · HDL + LDL · Hematocrit + Hemoglobin · Estradiol (sensitive) · Creatinine · PSA · SHBG
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--yellow)">→ Get full panel at Week 6. If E2 high: start Aromasin or Anastrozole.</div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Started</div>
+          <div style="font-size:15px;font-weight:700">26 April 2026</div>
+          <div style="font-size:10px;color:#333;margin-top:2px">Week 1 BP: 120/70 ✓</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── BRAND ───────────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-brand">
+
+      <div class="brand-hero">
+        <div style="font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">MY PERSONAL BRAND</div>
+        <div class="brand-name" id="brand-name-display">My Brand</div>
+        <div class="brand-tagline" id="brand-tagline-display">Building the long game.</div>
+      </div>
+
+      <div class="card" style="margin-bottom:10px">
+        <div class="row" style="margin-bottom:12px">
+          <div class="section-label" style="margin-bottom:0">SHORT-FORM CONTENT</div>
+          <div style="font-size:10px;color:var(--muted)">Resets at 6AM</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Posted today</div>
+        <div style="font-family:var(--font-display);font-size:42px;color:var(--pink);line-height:1" id="posts-today-count">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:10px">videos</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Tap to mark posted</div>
+        <div class="post-tracker" id="post-dots"></div>
+      </div>
+
+      <div class="row" style="margin-bottom:10px">
+        <div class="section-label" style="margin-bottom:0">PLATFORMS</div>
+        <button class="btn-ghost" style="font-size:10px" onclick="document.getElementById('add-social-modal').classList.add('open')">+ Add Platform</button>
+      </div>
+      <div id="socials-list"></div>
+
+      <div class="coming-soon">
+        <div class="coming-soon-icon">📊</div>
+        <div class="coming-soon-title">AUTO FOLLOWER SYNC</div>
+        <div class="coming-soon-body">Automatic daily follower count fetching from TikTok, Instagram, YouTube APIs. Growth analytics and posting consistency scores.</div>
+        <div class="phase-tag">PHASE 2 — REQUIRES BACKEND</div>
+      </div>
+
+      <div class="coming-soon">
+        <div class="coming-soon-icon">💡</div>
+        <div class="coming-soon-title">CONTENT IDEAS BANK</div>
+        <div class="coming-soon-body">AI-generated content ideas based on your niche and growth goals. Save, rate, and schedule ideas.</div>
+        <div class="phase-tag">PHASE 2 — REQUIRES BACKEND</div>
+      </div>
+
+    </div>
+
+    <!-- ── GOALS ──────────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-goals">
+
+      <div class="section-label">TRANSFORMATION TARGETS</div>
+      <div id="goals-full-list"></div>
+
+      <div class="row" style="margin-bottom:10px;margin-top:16px">
+        <div class="section-label" style="margin-bottom:0">CUSTOM GOALS</div>
+        <button class="btn-ghost" style="font-size:10px" onclick="document.getElementById('add-goal-modal').classList.add('open')">+ Add Goal</button>
+      </div>
+      <div id="custom-goals-list"></div>
+
+      <div class="card" style="margin-top:10px">
+        <div class="section-label">LIFESTYLE NOTES</div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Tanning Notes</div>
+          <textarea rows="2" placeholder="Sessions, products, skin response..." style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('tan_notes',this.value)" id="tan-notes-area"></textarea>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Skincare Notes</div>
+          <textarea rows="2" placeholder="Routine, improvements, products..." style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('skin_notes',this.value)" id="skin-notes-area"></textarea>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Life Improvement</div>
+          <textarea rows="2" placeholder="What did you improve today?" style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('life_notes',this.value)" id="life-notes-area"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── PHONE LOG ───────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-phonelog">
+
+      <div class="card card-glow-gold" style="margin-bottom:12px">
+        <div class="section-label">TOTAL SCREEN TIME</div>
+        <div style="font-family:var(--font-display);font-size:38px;color:var(--gold)" id="total-screen-time">0h 0m today</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Enter minutes per app below</div>
+      </div>
+
+      <div class="section-label">APP USAGE LOG</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div id="phone-log-list"></div>
+      </div>
+
+      <div class="card" style="margin-top:10px">
+        <div class="section-label">HONESTY CHECK</div>
+        <textarea rows="3" placeholder="What did you actually do with your phone today? Be honest — your coach uses this." style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('phone_notes',this.value)"></textarea>
+      </div>
+
+      <div class="alert-card blue" style="margin-top:10px">
+        <div class="alert-title" style="color:var(--aqua)">💡 Why This Matters</div>
+        <div class="alert-body">Your Coach AI uses your phone log to give accurate lifestyle advice. The more honest you are, the better the coaching. Mindless scrolling kills focus, disrupts sleep, and steals hours from building your physique and brand.</div>
+      </div>
+
+    </div>
+
+    <!-- ── BUSINESS ────────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-business">
+
+      <div class="section-label">BUSINESS SYSTEMS</div>
+
+      <div class="coming-soon">
+        <div class="coming-soon-icon">📈</div>
+        <div class="coming-soon-title">AI INVESTMENT STRATEGIES</div>
+        <div class="coming-soon-body">AI-powered portfolio analysis, market signals, and investment decision logging. Track your investment thesis and performance over time.</div>
+        <div class="phase-tag">PHASE 2 — REQUIRES BACKEND</div>
+      </div>
+
+      <div class="coming-soon">
+        <div class="coming-soon-icon">📊</div>
+        <div class="coming-soon-title">STOCKS & PORTFOLIO</div>
+        <div class="coming-soon-body">Real-time portfolio tracking, P&L dashboard, and AI-assisted position sizing. Connect to broker APIs.</div>
+        <div class="phase-tag">PHASE 2 — REQUIRES BACKEND</div>
+      </div>
+
+      <div class="coming-soon">
+        <div class="coming-soon-icon">🤖</div>
+        <div class="coming-soon-title">AI SYSTEMS LOG</div>
+        <div class="coming-soon-body">Log AI decisions, automation outputs, and system reasoning. Track what's working and what to iterate on.</div>
+        <div class="phase-tag">PHASE 2 — REQUIRES BACKEND</div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">BUSINESS NOTES</div>
+        <textarea rows="6" placeholder="Ideas, decisions, wins, lessons learned..." style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('business_notes',this.value)" id="business-notes"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="section-label">INCOME LOG</div>
+        <textarea rows="3" placeholder="Log any income, revenue, brand deals..." style="width:100%;font-size:12px;padding:8px 0" oninput="localStorage.setItem('income_notes',this.value)"></textarea>
+      </div>
+
+    </div>
+
+  </div><!-- end #content -->
+
+  <!-- NAV -->
+  <div id="nav">
+    <button class="nav-btn active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><span class="nav-icon">⚡</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn" data-tab="coach" onclick="switchTab('coach',this)"><span class="nav-icon">🤖</span><span class="nav-label">Coach</span></button>
+    <button class="nav-btn" data-tab="train" onclick="switchTab('train',this)"><span class="nav-icon">🏋️</span><span class="nav-label">Train</span></button>
+    <button class="nav-btn" data-tab="daily" onclick="switchTab('daily',this)"><span class="nav-icon">📋</span><span class="nav-label">Daily</span></button>
+    <button class="nav-btn" data-tab="health" onclick="switchTab('health',this)"><span class="nav-icon">🩸</span><span class="nav-label">Health</span></button>
+    <button class="nav-btn" data-tab="brand" onclick="switchTab('brand',this)"><span class="nav-icon">📲</span><span class="nav-label">Brand</span></button>
+    <button class="nav-btn" data-tab="goals" onclick="switchTab('goals',this)"><span class="nav-icon">🎯</span><span class="nav-label">Goals</span></button>
+    <button class="nav-btn" data-tab="phonelog" onclick="switchTab('phonelog',this);renderPhoneLog()"><span class="nav-icon">📱</span><span class="nav-label">Phone</span></button>
+  </div>
+
+</div><!-- end #app -->
+
+<script>
+// Sub-tab helpers
+function setTrainTab(name, btn) {
+  ['log','library','history'].forEach(t => {
+    const el = document.getElementById('train-tab-'+t);
+    if(el) el.style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('#train-pill-tabs .pill-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(name==='history') renderWorkoutHistory();
+}
+function setHealthTab(name, btn) {
+  ['body','sleep','labs','cycle'].forEach(t => {
+    const el = document.getElementById('health-tab-'+t);
+    if(el) el.style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('#tab-health .pill-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+function renderWorkoutHistory() {
+  const el = document.getElementById('workout-history-list');
+  if(!el) return;
+  if(!window.state || !state.workouts.length){
+    el.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">No workouts logged yet</div>';
+    return;
+  }
+  el.innerHTML = '';
+  [...state.workouts].reverse().slice(0,20).forEach(w => {
+    const dur = w.endTime ? Math.round((w.endTime-w.startTime)/60000) : '—';
+    const sets = w.exercises.reduce((t,e)=>t+e.sets.filter(s=>s.logged).length,0);
+    const d = document.createElement('div');
+    d.className='card';
+    d.style.marginBottom='8px';
+    d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:13px;font-weight:700">${w.name||'Workout'}</div><div style="font-size:10px;color:var(--muted)">${w.date}</div></div>
+      <div style="text-align:right"><div style="font-size:12px;color:var(--gold)">${dur}min</div><div style="font-size:10px;color:var(--muted)">${sets} sets</div></div>
+    </div>`;
+    el.appendChild(d);
+  });
+}
+
+// Load localStorage notes on boot
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const tomorrow = document.getElementById('tomorrow-plan');
+    if(tomorrow) tomorrow.value = localStorage.getItem('tomorrow')||'';
+    const reflection = document.getElementById('daily-reflection');
+    if(reflection) reflection.value = localStorage.getItem('reflection_'+new Date().toISOString().split('T')[0])||'';
+    const struggles = document.getElementById('struggles');
+    if(struggles) struggles.value = localStorage.getItem('struggles')||'';
+    const tan = document.getElementById('tan-notes-area');
+    if(tan) tan.value = localStorage.getItem('tan_notes')||'';
+    const skin = document.getElementById('skin-notes-area');
+    if(skin) skin.value = localStorage.getItem('skin_notes')||'';
+    const life = document.getElementById('life-notes-area');
+    if(life) life.value = localStorage.getItem('life_notes')||'';
+    const biz = document.getElementById('business-notes');
+    if(biz) biz.value = localStorage.getItem('business_notes')||'';
+
+    // PCT dates
+    const hcgEl = document.getElementById('hcg-stop');
+    if(hcgEl) hcgEl.textContent = window.getHCGStop ? getHCGStop() : '—';
+    const pctEl = document.getElementById('pct-start');
+    if(pctEl) pctEl.textContent = window.getPCTDate ? getPCTDate() : '—';
+
+    // Streak
+    const streakEl = document.getElementById('streak-display');
+    if(streakEl && window.state) streakEl.textContent = state.streak||0;
+  }, 2500);
+});
+</script>
+<script src="app.js"></script>
+</body>
+</html>
