@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Transformation OS</title>
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Transformation OS">
+
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<style>
+body{
+  margin:0;
+  background:#0a0a0a;
+  color:white;
+  font-family:Arial,sans-serif;
+  animation:fadeIn .4s ease;
+  overflow-x:hidden;
+}
+
+#splash{
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  transition:opacity .5s ease;
+}
+
+#splash img{
+  width:140px;
+  border-radius:24px;
+  box-shadow:0 0 30px rgba(255,255,255,.15);
+}
+
+#splash h1{
+  margin-top:20px;
+  font-size:22px;
+  letter-spacing:2px;
+}
+
+.page{
+  padding:20px;
+  animation:slideUp .35s ease;
+}
+
+.card{
+  background:#111;
+  border:1px solid #222;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+}
+
+button{
+  background:#222;
+  color:white;
+  border:none;
+  border-radius:12px;
+  padding:12px 16px;
+  font-size:16px;
+}
+
+input{
+  width:100%;
+  background:#1a1a1a;
+  border:1px solid #333;
+  color:white;
+  border-radius:12px;
+  padding:14px;
+  font-size:16px;
+  margin-top:10px;
+  box-sizing:border-box;
+}
+
+#aiResponse{
+  margin-top:16px;
+  line-height:1.6;
+  color:#ddd;
+}
+
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+@keyframes slideUp{
+  from{
+    transform:translateY(20px);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="splash">
+  <img src="assets/logo.jpg">
+  <h1>Transformation OS</h1>
+</div>
+
+<div class="page">
+
+  <div class="card">
+    <h2>AI Voice Assistant</h2>
+
+    <button onclick="startVoiceInput()">🎤 Speak</button>
+
+    <input id="aiInput" placeholder="Ask anything...">
+
+    <div id="aiResponse">
+      Ready.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Offline Storage</h2>
+    <button onclick="saveNote()">Save Test Note</button>
+  </div>
+
+</div>
+
+<script>
+setTimeout(()=>{
+  document.getElementById("splash").style.opacity="0";
+
+  setTimeout(()=>{
+    document.getElementById("splash").style.display="none";
+  },500);
+
+},1800);
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+
+const recognition = new webkitSpeechRecognition();
+
+recognition.continuous = false;
+recognition.lang = "en-GB";
+
+function startVoiceInput(){
+  recognition.start();
+}
+
+recognition.onresult = function(event){
+
+  const text = event.results[0][0].transcript;
+
+  document.getElementById("aiInput").value = text;
+
+  respondAI(text);
+};
+
+function speak(text){
+
+  const speech = new SpeechSynthesisUtterance(text);
+
+  speech.lang = "en-GB";
+
+  window.speechSynthesis.speak(speech);
+}
+
+function respondAI(text){
+
+  let response = "I understand.";
+
+  if(text.toLowerCase().includes("sleep")){
+    response = "Your sleep is important for recovery and hormone balance.";
+  }
+
+  if(text.toLowerCase().includes("motivation")){
+    response = "Discipline compounds over time. Stay consistent.";
+  }
+
+  if(text.toLowerCase().includes("bloodwork")){
+    response = "Remember to monitor liver enzymes and hematocrit regularly.";
+  }
+
+  document.getElementById("aiResponse").innerText = response;
+
+  speak(response);
+
+  saveConversation(text,response);
+}
+
+function saveConversation(user, ai){
+
+  let history = JSON.parse(localStorage.getItem("ai_history") || "[]");
+
+  history.push({
+    time:new Date().toISOString(),
+    user:user,
+    ai:ai
+  });
+
+  localStorage.setItem("ai_history", JSON.stringify(history));
+}
+
+function saveNote(){
+
+  localStorage.setItem(
+    "saved_note",
+    "Transformation OS offline storage working."
+  );
+
+  alert("Saved locally on your iPhone.");
+}
+</script>
+
+</body>
+</html>
